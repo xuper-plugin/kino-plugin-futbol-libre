@@ -1,0 +1,82 @@
+{
+  "id": "futbol-libre",
+  "name": "Fútbol Libre",
+  "version": "0.1.0",
+  "apiVersion": 9,
+  "entry": "plugin.js",
+  "icon": "icon.png",
+  "description": "Partidos de hoy y canales deportivos en vivo con agenda, varios servidores de respaldo y sitios espejo que se prueban solos si uno falla.",
+  "author": "xuper-plugin",
+  "homepage": "https://github.com/xuper-plugin/kino-plugin-futbol-libre",
+  "hosts": [
+    "futbollibretvplus.com",
+    "futbollibreenvivo.futbol",
+    "futbol-libre.app",
+    "api.wqxag.com",
+    "tvf90.com",
+    "la18hd.su",
+    "streamxhd.st",
+    "streamtp99a.sbs",
+    "*.ftlly.com",
+    "*.fubo18.com",
+    "*.futlivehd.com",
+    "*.domhsd.com"
+  ],
+  "capabilities": ["channels", "home", "search", "browse", "scopedSearch", "resolve"],
+  "liveStreamHosts": "any",
+  "streamHosts": "any",
+  "categories": ["live"],
+  "color": "#2EE6A6",
+  "section": { "label": "Fútbol Libre", "labelEn": "Free Football" },
+  "theme": {
+    "accent": "#2EE6A6",
+    "onAccent": "#04130C",
+    "background": "#06100B",
+    "surface": "#0E1C15",
+    "highlight": "#F5C84B"
+  },
+  "telemetry": true,
+  "settings": [
+    {
+      "key": "timeSection",
+      "type": "section",
+      "label": "Horario",
+      "labelEn": "Time"
+    },
+    {
+      "key": "utcOffset",
+      "type": "select",
+      "label": "Mi zona horaria",
+      "labelEn": "My time zone",
+      "hint": "Para mostrar la hora de cada partido.",
+      "hintEn": "To show each match's kick-off time.",
+      "default": "-5",
+      "options": [
+        { "value": "-8", "label": "California (UTC-8)", "labelEn": "California (UTC-8)" },
+        { "value": "-6", "label": "México, Centroamérica (UTC-6)", "labelEn": "Mexico, Central America (UTC-6)" },
+        { "value": "-5", "label": "Colombia, Perú, Ecuador (UTC-5)", "labelEn": "Colombia, Peru, Ecuador (UTC-5)" },
+        { "value": "-4", "label": "Venezuela, Bolivia (UTC-4)", "labelEn": "Venezuela, Bolivia (UTC-4)" },
+        { "value": "-3", "label": "Argentina, Uruguay, Brasil (UTC-3)", "labelEn": "Argentina, Uruguay, Brazil (UTC-3)" },
+        { "value": "1", "label": "España (UTC+1)", "labelEn": "Spain (UTC+1)" }
+      ]
+    },
+    {
+      "key": "statusSection",
+      "type": "section",
+      "label": "Sitios",
+      "labelEn": "Sites"
+    },
+    {
+      "key": "siteStatus",
+      "type": "status",
+      "label": "Agenda",
+      "labelEn": "Schedule"
+    },
+    {
+      "key": "checkSites",
+      "type": "action",
+      "label": "Probar los sitios",
+      "labelEn": "Test the sites"
+    }
+  ]
+}
