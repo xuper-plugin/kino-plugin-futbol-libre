@@ -583,7 +583,9 @@ async function runToken(token, ms) {
   return "";
 }
 
-// A live playlist, or "offline" when the server answers 404/5xx; a host this plugin cannot check is trusted as is.
+// A live playlist, "offline" when the server answers 404/5xx, or "slow" when it does not answer in time: a healthy list comes back in
+// under a second, while a dead channel's server keeps the connection ~10 s before it says 404 or 500 (verified 2026-10-25: Fox Sports,
+// Canal 11, Azteca Deportes). A host this plugin cannot check is trusted as is.
 async function verify(url) {
   if (!/^https:\/\/[^/]*\.(?:ftlly|fubo18|domhsd)\.com[:/]/.test(url)) return "ok";
   try {
@@ -591,7 +593,7 @@ async function verify(url) {
     if (r.ok) return /^#EXTM3U/.test(r.text().trimStart()) ? "ok" : "offline";
     return r.status >= 400 ? "offline" : "ok";
   } catch {
-    return "ok";
+    return "slow";
   }
 }
 
@@ -606,8 +608,13 @@ export async function resolve(ref) {
     try {
       const url = await runToken(token, Math.min(8000, left - 1500));
       if (!url) continue;
-      if ((await verify(url)) === "offline") {
+      const verdict = await verify(url);
+      if (verdict === "offline") {
         sawOffline = true;
+        continue;
+      }
+      if (verdict === "slow") {
+        sawOffline = true; // a dead channel's server keeps the connection ~10 s: try the other players, and say "no signal" if none is better
         continue;
       }
       return { url, mime: "application/vnd.apple.mpegurl", expiresInSeconds: 4 * 3600 };
