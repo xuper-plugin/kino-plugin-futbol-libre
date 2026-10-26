@@ -1,7 +1,7 @@
 {
   "id": "futbol-libre",
   "name": "Fútbol Libre",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "apiVersion": 9,
   "entry": "plugin.js",
   "icon": "icon.png",

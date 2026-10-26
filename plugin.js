@@ -583,16 +583,25 @@ async function runToken(token, ms) {
   return "";
 }
 
-// A live playlist, "offline" when the server answers 404/5xx, or "slow" when it does not answer in time: a healthy list comes back in
-// under a second, while a dead channel's server keeps the connection ~10 s before it says 404 or 500 (verified 2026-10-25: Fox Sports,
-// Canal 11, Azteca Deportes). A host this plugin cannot check is trusted as is.
+// A live playlist, "offline" when the server answers 404/5xx, or "slow" when it does not answer in time. A healthy list comes back in
+// under a second from a good connection, while a dead channel's server keeps the connection ~10 s before it says 404 or 500 (Fox Sports,
+// Canal 11, Azteca Deportes, 2026-10-25). But a slow phone or TV box can also miss the 4.5 s, and 0.1.2 turned that into "no signal" for
+// ESPN: a slow answer is not proof, so such a player only goes after the others. A host this plugin cannot check is trusted as is.
+// Each verdict is logged: a failed call carries those lines to the error board.
 async function verify(url) {
   if (!/^https:\/\/[^/]*\.(?:ftlly|fubo18|domhsd)\.com[:/]/.test(url)) return "ok";
+  const host = (/^https:\/\/([^/:]+)/.exec(url) || [])[1];
   try {
     const r = await kino.fetch(url, { timeoutMs: 4500 });
-    if (r.ok) return /^#EXTM3U/.test(r.text().trimStart()) ? "ok" : "offline";
+    if (r.ok) {
+      if (/^#EXTM3U/.test(r.text().trimStart())) return "ok";
+      kino.log("verify " + host + ": not a playlist");
+      return "offline";
+    }
+    kino.log("verify " + host + ": status " + r.status);
     return r.status >= 400 ? "offline" : "ok";
-  } catch {
+  } catch (e) {
+    kino.log("verify " + host + ": " + (e && e.code));
     return "slow";
   }
 }
@@ -602,19 +611,23 @@ export async function resolve(ref) {
   if (!m) throw kino.error("not_found", "ref", { userMessage: t("unknownRef") });
   const started = Date.now();
   let sawOffline = false;
+  let slow = "";
   for (const token of m[1].split(",").slice(0, 8)) {
     const left = 18000 - (Date.now() - started);
     if (left < 2500) break;
     try {
       const url = await runToken(token, Math.min(8000, left - 1500));
-      if (!url) continue;
+      if (!url) {
+        kino.log("player " + token.split(".")[0] + ": no address");
+        continue;
+      }
       const verdict = await verify(url);
       if (verdict === "offline") {
         sawOffline = true;
         continue;
       }
       if (verdict === "slow") {
-        sawOffline = true; // a dead channel's server keeps the connection ~10 s: try the other players, and say "no signal" if none is better
+        slow = slow || url; // the other players first; this one only if none is better
         continue;
       }
       return { url, mime: "application/vnd.apple.mpegurl", expiresInSeconds: 4 * 3600 };
@@ -622,6 +635,7 @@ export async function resolve(ref) {
       kino.log("player " + token.split(".")[0] + " failed: " + (e && e.code));
     }
   }
+  if (slow) return { url: slow, mime: "application/vnd.apple.mpegurl", expiresInSeconds: 4 * 3600 };
   throw kino.error("unavailable", sawOffline ? "offline" : "no player", { userMessage: t(sawOffline ? "offline" : "unavailable") });
 }
 
