@@ -1,7 +1,7 @@
 {
   "id": "futbol-libre",
   "name": "Fútbol Libre",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "apiVersion": 9,
   "entry": "plugin.js",
   "icon": "icon.png",
@@ -11,6 +11,7 @@
   "hosts": [
     "futbollibretvplus.com",
     "futbollibreenvivo.futbol",
+    "futbolvivo.site",
     "futbol-libre.app",
     "api.wqxag.com",
     "tvf90.com",

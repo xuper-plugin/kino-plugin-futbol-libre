@@ -6,7 +6,7 @@
 //
 // The sites, in the order they are tried (the next one only when the one before fails or comes back empty):
 //   primary   futbollibretvplus.com   agenda: api.wqxag.com/diaries.json (JSON)
-//   backup 1  futbollibreenvivo.futbol agenda: /api/agenda (JSON)
+//   backup 1  futbolvivo.site (futbollibreenvivo.futbol redirects to it) agenda: /api/agenda (JSON)
 //   backup 2  futbol-libre.app        agenda: /agenda (HTML), playback: /api/direct-playback.php
 // A match or a channel is a "ref" listing candidate players (tokens); resolve tries them until one answers a live playlist.
 
@@ -51,7 +51,7 @@ function t(key, vars) {
 // ---- 2. sites and settings ---------------------------------------------------------------------------------------
 
 const PRIMARY = "https://futbollibretvplus.com";
-const BACKUP1 = "https://futbollibreenvivo.futbol";
+const BACKUP1 = "https://futbolvivo.site"; // futbollibreenvivo.futbol redirects here: the redirect target has to be a declared host
 const BACKUP2 = "https://futbol-libre.app";
 const AGENDA_API = "https://api.wqxag.com/diaries.json";
 const IMG = "https://img.wqxag.com";
@@ -162,7 +162,7 @@ function limaMs(date, hour) {
 }
 
 async function agendaPrimary() {
-  const r = await kino.fetch(AGENDA_API, { timeoutMs: 9000 });
+  const r = await kino.fetch(AGENDA_API, { timeoutMs: 8000 });
   if (!r.ok) throw kino.error("unavailable", "agenda " + r.status);
   const data = r.json().data;
   if (!Array.isArray(data)) throw kino.error("unavailable", "agenda shape");
@@ -186,7 +186,7 @@ async function agendaPrimary() {
 }
 
 async function agendaBackup1() {
-  const r = await kino.fetch(BACKUP1 + "/api/agenda", { timeoutMs: 9000 });
+  const r = await kino.fetch(BACKUP1 + "/api/agenda", { timeoutMs: 8000 });
   if (!r.ok) throw kino.error("unavailable", "agenda " + r.status);
   const events = r.json().events;
   if (!Array.isArray(events)) throw kino.error("unavailable", "agenda shape");
@@ -205,7 +205,7 @@ async function agendaBackup1() {
 }
 
 async function agendaBackup2() {
-  const r = await kino.fetch(BACKUP2 + "/agenda", { timeoutMs: 12000 });
+  const r = await kino.fetch(BACKUP2 + "/agenda", { timeoutMs: 9000 });
   if (!r.ok) throw kino.error("unavailable", "agenda " + r.status);
   const out = [];
   for (const chunk of r.text().split('<div class="source-agenda-event"').slice(1)) {
@@ -224,24 +224,59 @@ async function agendaBackup2() {
   return out;
 }
 
-// The agenda from the first site that answers with matches; one that errors or comes back empty hands over to the next.
+const AGENDA_KEY = "agenda1";
+const AGENDA_STALE_MS = 12 * HOUR;
+const AGENDA_SAVED_MAX = 60;
+
+function upcoming(list) {
+  const now = Date.now();
+  return list.filter((e) => e.start + 3 * HOUR > now).sort((a, b) => a.start - b.start);
+}
+
+// Home has 20 s and a slow site used to eat all of it: the sites run one after another (9 + 9 + 12 s) on a phone far from them.
+// Now the primary starts at once and each backup a few seconds later (sooner when every earlier one has already failed or come
+// back empty); the first with matches wins. Every attempt is cut at 8-9 s, so the last one ends by 14 s.
+const AGENDA_SITES = [["primary", agendaPrimary, 0], ["backup1", agendaBackup1, 3000], ["backup2", agendaBackup2, 5000]];
+
 async function loadAgenda() {
-  const order = [["primary", agendaPrimary], ["backup1", agendaBackup1], ["backup2", agendaBackup2]];
+  let win = (_v) => {};
+  const winner = new Promise((resolve) => { win = resolve; });
+  const gates = AGENDA_SITES.map(() => {
+    let open = () => {};
+    const done = new Promise((resolve) => { open = resolve; });
+    return { done, open };
+  });
   let answered = "";
-  for (const [name, fn] of order) {
-    try {
-      const list = await fn();
-      answered = answered || name;
-      const now = Date.now();
-      const kept = list.filter((e) => e.start + 3 * HOUR > now).sort((a, b) => a.start - b.start);
+  AGENDA_SITES.forEach(([name, fn, delay], i) => {
+    (async () => {
+      if (i > 0) await Promise.race([Promise.all(gates.slice(0, i).map((g) => g.done)), kino.sleep(delay)]);
+      try {
+        const kept = upcoming(await fn());
+        answered = answered || name;
+        if (kept.length) win({ name, kept });
+      } catch (e) {
+        kino.log("agenda " + name + " failed: " + (e && e.code));
+      }
+      gates[i].open();
+    })();
+  });
+  const result = await Promise.race([winner, Promise.all(gates.map((g) => g.done)).then(() => null)]);
+  if (result) {
+    lastAgendaSource = result.name;
+    try { kino.storage.set(AGENDA_KEY, JSON.stringify({ at: Date.now(), name: result.name, events: result.kept.slice(0, AGENDA_SAVED_MAX) })); } catch { /* storage full: not kept */ }
+    return result.kept;
+  }
+  // Nobody answered with matches: the last good agenda still says what is on, better than an empty Home.
+  try {
+    const saved = JSON.parse(kino.storage.get(AGENDA_KEY) || "null");
+    if (saved && Array.isArray(saved.events) && Date.now() - saved.at < AGENDA_STALE_MS) {
+      const kept = upcoming(saved.events);
       if (kept.length) {
-        lastAgendaSource = name;
+        lastAgendaSource = saved.name || "";
         return kept;
       }
-    } catch (e) {
-      kino.log("agenda " + name + " failed: " + (e && e.code));
     }
-  }
+  } catch { /* unreadable: no saved agenda */ }
   lastAgendaSource = answered;
   return [];
 }
