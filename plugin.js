@@ -5,8 +5,8 @@
 //                        7. browse, search, home  8. section and categories  9. resolve  10. settings
 //
 // The sites, in the order they are tried (the next one only when the one before fails or comes back empty):
-//   primary   futbollibretvplus.com   agenda: api.wqxag.com/diaries.json (JSON)
-//   backup 1  futbolvivo.site (futbollibreenvivo.futbol redirects to it) agenda: /api/agenda (JSON)
+//   primary   futbollibregol.org (futbollibretvplus.com redirects to it)   agenda: api.wqxag.com/diaries.json (JSON)
+//   backup 1  futbollibreliga.online (futbolvivo.site and futbollibreenvivo.futbol redirect to its home page) agenda: /api/agenda (JSON)
 //   backup 2  futbol-libre.app        agenda: /agenda (HTML), playback: /api/direct-playback.php
 // A match or a channel is a "ref" listing candidate players (tokens); resolve tries them until one answers a live playlist.
 
@@ -50,8 +50,8 @@ function t(key, vars) {
 
 // ---- 2. sites and settings ---------------------------------------------------------------------------------------
 
-const PRIMARY = "https://futbollibretvplus.com";
-const BACKUP1 = "https://futbolvivo.site"; // futbollibreenvivo.futbol redirects here: the redirect target has to be a declared host
+const PRIMARY = "https://futbollibregol.org"; // futbollibretvplus.com redirects here: the redirect target has to be a declared host
+const BACKUP1 = "https://futbollibreliga.online"; // futbolvivo.site and futbollibreenvivo.futbol redirect to its home page, and its /api/agenda is here
 const BACKUP2 = "https://futbol-libre.app";
 const AGENDA_API = "https://api.wqxag.com/diaries.json";
 const IMG = "https://img.wqxag.com";

@@ -15,7 +15,7 @@ Today's matches and live sports channels inside Kino, with a schedule, several b
 
 ## Respaldos
 
-La agenda se lee del sitio principal (`futbollibretvplus.com`); si falla o viene vacía se usa el **respaldo 1** (`futbollibreenvivo.futbol`) y luego el **respaldo 2** (`futbol-libre.app`). Cada partido o canal trae varios reproductores (tvf90, la18hd, streamxhd, streamtp) y se prueban en orden hasta que uno entrega una lista HLS viva. En Ajustes, "Probar los sitios" dice cuáles responden.
+La agenda se lee del sitio principal (`futbollibregol.org`, antes `futbollibretvplus.com`); si falla o viene vacía se usa el **respaldo 1** (`futbollibreliga.online`, antes `futbollibreenvivo.futbol`) y luego el **respaldo 2** (`futbol-libre.app`). Cada partido o canal trae varios reproductores (tvf90, la18hd, streamxhd, streamtp) y se prueban en orden hasta que uno entrega una lista HLS viva. En Ajustes, "Probar los sitios" dice cuáles responden.
 
 ## Desarrollo
 

@@ -1,7 +1,7 @@
 {
   "id": "futbol-libre",
   "name": "Fútbol Libre",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "apiVersion": 9,
   "entry": "plugin.js",
   "icon": "icon.png",
@@ -10,8 +10,10 @@
   "homepage": "https://github.com/xuper-plugin/kino-plugin-futbol-libre",
   "hosts": [
     "futbollibretvplus.com",
+    "futbollibregol.org",
     "futbollibreenvivo.futbol",
     "futbolvivo.site",
+    "futbollibreliga.online",
     "futbol-libre.app",
     "api.wqxag.com",
     "tvf90.com",
@@ -23,12 +25,24 @@
     "*.futlivehd.com",
     "*.domhsd.com"
   ],
-  "capabilities": ["channels", "home", "search", "browse", "scopedSearch", "resolve"],
+  "capabilities": [
+    "channels",
+    "home",
+    "search",
+    "browse",
+    "scopedSearch",
+    "resolve"
+  ],
   "liveStreamHosts": "any",
   "streamHosts": "any",
-  "categories": ["live"],
+  "categories": [
+    "live"
+  ],
   "color": "#2EE6A6",
-  "section": { "label": "Fútbol Libre", "labelEn": "Free Football" },
+  "section": {
+    "label": "Fútbol Libre",
+    "labelEn": "Free Football"
+  },
   "theme": {
     "accent": "#2EE6A6",
     "onAccent": "#04130C",
@@ -53,12 +67,36 @@
       "hintEn": "To show each match's kick-off time.",
       "default": "-5",
       "options": [
-        { "value": "-8", "label": "California (UTC-8)", "labelEn": "California (UTC-8)" },
-        { "value": "-6", "label": "México, Centroamérica (UTC-6)", "labelEn": "Mexico, Central America (UTC-6)" },
-        { "value": "-5", "label": "Colombia, Perú, Ecuador (UTC-5)", "labelEn": "Colombia, Peru, Ecuador (UTC-5)" },
-        { "value": "-4", "label": "Venezuela, Bolivia (UTC-4)", "labelEn": "Venezuela, Bolivia (UTC-4)" },
-        { "value": "-3", "label": "Argentina, Uruguay, Brasil (UTC-3)", "labelEn": "Argentina, Uruguay, Brazil (UTC-3)" },
-        { "value": "1", "label": "España (UTC+1)", "labelEn": "Spain (UTC+1)" }
+        {
+          "value": "-8",
+          "label": "California (UTC-8)",
+          "labelEn": "California (UTC-8)"
+        },
+        {
+          "value": "-6",
+          "label": "México, Centroamérica (UTC-6)",
+          "labelEn": "Mexico, Central America (UTC-6)"
+        },
+        {
+          "value": "-5",
+          "label": "Colombia, Perú, Ecuador (UTC-5)",
+          "labelEn": "Colombia, Peru, Ecuador (UTC-5)"
+        },
+        {
+          "value": "-4",
+          "label": "Venezuela, Bolivia (UTC-4)",
+          "labelEn": "Venezuela, Bolivia (UTC-4)"
+        },
+        {
+          "value": "-3",
+          "label": "Argentina, Uruguay, Brasil (UTC-3)",
+          "labelEn": "Argentina, Uruguay, Brazil (UTC-3)"
+        },
+        {
+          "value": "1",
+          "label": "España (UTC+1)",
+          "labelEn": "Spain (UTC+1)"
+        }
       ]
     },
     {
