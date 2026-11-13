@@ -516,9 +516,18 @@ export async function categories() {
 const ID = /^[A-Za-z0-9_-]{1,40}$/;
 const SLUG = /^[a-z0-9-]{1,100}$/;
 const PLAYBACK = /playbackURL\s*=\s*"([^"]+)"/;
+// tvf90 and streamtp moved from Swarmcloud (var playbackURL = "...") to the CDNPEER SDK, which carries
+// the address as the "src" of cdnpeer.clappr(Clappr, {...}); read that shape first, the old one as fallback.
+const CDNPEER_SRC = /cdnpeer\.clappr\([^,]+,\s*\{[^}]*?"src"\s*:\s*"([^"]+)"/;
 
 function unslash(s) {
   return String(s).replace(/\\\//g, "/");
+}
+
+// The playback address from a Clappr page, in either shape the sister sites use.
+function playbackFrom(html) {
+  const m = CDNPEER_SRC.exec(html) || PLAYBACK.exec(html);
+  return m ? unslash(m[1]) : "";
 }
 
 async function get(url, headers, ms) {
@@ -527,8 +536,7 @@ async function get(url, headers, ms) {
 
 async function viaTvf90(id, ms) {
   const r = await get(`https://tvf90.com/5.php?stream=${id}`, { Referer: "https://tvf90.com/" }, ms);
-  const m = r.ok && PLAYBACK.exec(r.text());
-  return m ? unslash(m[1]) : "";
+  return r.ok ? playbackFrom(r.text()) : "";
 }
 
 async function viaLa18(id, plural, ms) {
@@ -563,8 +571,7 @@ async function viaStreamxhd(id, ms) {
 
 async function viaStreamtp(id, ms) {
   const r = await get(`https://streamtp99a.sbs/global1.php?stream=${id}`, {}, ms);
-  const m = r.ok && PLAYBACK.exec(r.text());
-  return m ? unslash(m[1]) : "";
+  return r.ok ? playbackFrom(r.text()) : "";
 }
 
 // Backup 2's own API names the player it uses for a source; that player's address goes back through the same recipes.
