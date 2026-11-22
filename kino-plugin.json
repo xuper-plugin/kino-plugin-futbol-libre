@@ -1,7 +1,7 @@
 {
   "id": "futbol-libre",
   "name": "Fútbol Libre",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "apiVersion": 9,
   "entry": "plugin.js",
   "icon": "icon.png",
@@ -10,9 +10,11 @@
   "homepage": "https://github.com/xuper-plugin/kino-plugin-futbol-libre",
   "hosts": [
     "futbollibretvplus.com",
+    "futbollibrego.org",
     "futbollibregol.org",
     "futbollibreenvivo.futbol",
     "futbolvivo.site",
+    "futbol-libretv.top",
     "futbollibreliga.online",
     "futbol-libre.app",
     "api.wqxag.com",
